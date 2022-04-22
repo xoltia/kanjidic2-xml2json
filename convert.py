@@ -45,24 +45,27 @@ for character in soup.find_all('character'):
         character_data['onyomi'] = [
             yomi.text for yomi in rm.find_all('reading') 
                 if yomi['r_type'] == 'ja_on'
-        ] or None
+        ]
         character_data['kunyomi'] = [
             yomi.text for yomi in rm.find_all('reading') 
                 if yomi['r_type'] == 'ja_kun'
-        ] or None
+        ]
 
     # Nanori readings
-    nanori = character.reading_meaning.find_all('nanori')
-    character_data['nanori'] = [
-        yomi.text for yomi in nanori
-    ] or None
+    if character.reading_meaning is not None:
+        nanori = character.reading_meaning.find_all('nanori')
+        character_data['nanori'] = [
+            yomi.text for yomi in nanori
+        ]
+    else:
+        character_data['nanori'] = []
 
     # English meanings
     if rmgroup_present:
         character_data['meanings'] = [
             meaning.text for meaning in rm.find_all('meaning') 
                 if not meaning.has_attr('m_lang')
-        ] or None
+        ]
 
     # JLPT level
     misc_data = character.misc
