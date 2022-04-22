@@ -30,15 +30,11 @@ for character in soup.find_all('character'):
     character_data['literal'] = character.literal.text
 
     # Readings and meanings object
+    rmgroup_present = True
     try:
         rm = character.reading_meaning.rmgroup
     except AttributeError:
-        character_data['onyomi'] = None
-        character_data['kunyomi'] = None
-        character_data['meanings'] = None
         rmgroup_present = False
-    else:
-        rmgroup_present = True
 
     # Readings
     if rmgroup_present:
@@ -50,15 +46,18 @@ for character in soup.find_all('character'):
             yomi.text for yomi in rm.find_all('reading') 
                 if yomi['r_type'] == 'ja_kun'
         ]
+        if len(character_data['onyomi']) == 0:
+            del character_data['onyomi']
+        if len(character_data['kunyomi']) == 0:
+            del character_data['kunyomi']
 
     # Nanori readings
     if character.reading_meaning is not None:
         nanori = character.reading_meaning.find_all('nanori')
-        character_data['nanori'] = [
-            yomi.text for yomi in nanori
-        ]
-    else:
-        character_data['nanori'] = []
+        if len(nanori) > 0:
+            character_data['nanori'] = [
+                yomi.text for yomi in nanori
+            ]
 
     # English meanings
     if rmgroup_present:
@@ -66,33 +65,18 @@ for character in soup.find_all('character'):
             meaning.text for meaning in rm.find_all('meaning') 
                 if not meaning.has_attr('m_lang')
         ]
+        if len(character_data['meanings']) == 0:
+            del character_data['meanings']
 
     # JLPT level
     misc_data = character.misc
 
     if misc_data.jlpt:
         character_data['jlpt'] = int(character.misc.jlpt.text)
-    else:
-        character_data['jlpt'] = None
 
     # Grade
-    grade = {}
     if misc_data.grade:
-        grade_level = int(misc_data.grade.text)
-        
-        # Grade level
-        if grade_level <= 6:
-            grade['level'] = grade_level
-        else:
-            grade['level'] = None
-        
-        # Secondary school
-        grade['secondary_school'] = grade_level == 8
-
-        # Jinmeijou
-        grade['jinmeiyou'] = grade_level == 9 or grade_level == 10
-
-    character_data['grade'] = grade
+        character_data['grade_level'] = int(character.misc.grade.text)
 
     # And finally...
     characters.append(character_data)
