@@ -3,6 +3,38 @@ import sys
 
 from bs4 import BeautifulSoup
 
+def make_pascal_case(s: str) -> str:
+    """
+    This function transform a string to PascalCase
+    """
+    return s.replace('_', ' ').title().replace(' ', '')
+
+def make_camel_case(s: str) -> str:
+    """
+    This function transform a string to camelCase
+    """
+    pascal_case_str = make_pascal_case(s)
+    return pascal_case_str[0].lower() + pascal_case_str[1:]
+
+def enforce_name_policy(d: dict, policy: str) -> dict:
+    """
+    This function transform dict keys to match a certain naming standard
+    (camelCase, snake_case, etc.)
+    """
+
+    # Do nothing by default
+    key_creater = lambda x: x
+
+    if policy == 'camel':
+        key_creater = make_camel_case
+    elif policy == 'pascal':
+        key_creater = make_pascal_case
+
+    for key in list(d.keys()):
+        new_key = key_creater(key)
+        d[new_key] = d.pop(key)
+
+    return d
 
 if len(sys.argv) < 2:
     print('Too few arguments, please specify a file to be converted')
@@ -10,6 +42,7 @@ if len(sys.argv) < 2:
 
 # Open and parse the file
 FILE_NAME = sys.argv[1]
+NAME_POLICY = sys.argv[3] if len(sys.argv) > 3 else 'none'
 
 with open(FILE_NAME, encoding='utf8') as f:
     soup = BeautifulSoup(f.read().strip(), 'xml')
@@ -79,7 +112,7 @@ for character in soup.find_all('character'):
         character_data['grade_level'] = int(character.misc.grade.text)
 
     # And finally...
-    characters.append(character_data)
+    characters.append(enforce_name_policy(character_data, NAME_POLICY))
 
 
 # Save to a file
