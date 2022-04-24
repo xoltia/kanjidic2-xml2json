@@ -10,10 +10,27 @@ so if you'd rather install them using your package manager, then go for it.
 
 ## Usage
 ```
-python convert.py <input_filename> [output_filename]
+python convert.py <input_filename> [output_filename] [property_name_policy]
 ```
 If `output_filename` is not given, the program will set it to `kanjidic2.json`.
 
+`property_name_policy` can be either `camel` or `pascal`. If unset or set to an unknown string
+then the property names will be in snake_case to remain consistent with the XML names. 
+
+### JSON Structure
+The resulting output will parse to match the following type.
+
+*The property names here and in the example assume you are using the 'camel' name policy*
+```ts
+Array<{
+    literal: string,
+    onyomi?: string[],
+    kunyomi?: string[],
+    nanori?: string[],
+    jlpt?: number,
+    gradeLevel?: number
+}>
+```
 ### Example output
 *The actual output is not formatted.*
 ```json
@@ -38,11 +55,7 @@ If `output_filename` is not given, the program will set it to `kanjidic2.json`.
       "-ous"
     ],
     "jlpt": 1,
-    "grade": {
-      "level": null,
-      "secondary_school": true,
-      "jinmeiyou": false
-    }
+    "gradeLevel": 8
   }
 ]
 ```
